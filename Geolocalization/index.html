@@ -161,10 +161,10 @@
     <div id="erroMsg" class="error"></div>
   </form>
 
-  <!-- Firebase e lógica JS -->
-  <script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/11.9.1/firebase-app.js";
-    import { getDatabase, ref, get, child } from "https://www.gstatic.com/firebasejs/11.9.1/firebase-database.js";
+  <!-- Firebase SDKs -->
+  <script src="https://www.gstatic.com/firebasejs/11.9.1/firebase-app.js"></script> 
+  <script src="https://www.gstatic.com/firebasejs/11.9.1/firebase-database.js"></script>
+  <script>
 
     const firebaseConfig = {
       apiKey: "AIzaSyC3P2fwNlkUPkpoCnaxWtp9-61163huINE",
@@ -209,5 +209,6 @@
     });
   </script>
 </body>
+
 
 </html>
