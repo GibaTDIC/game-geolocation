@@ -1,0 +1,285 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <title>Editar Prova</title>
+  <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap" rel="stylesheet">
+  <style>
+   :root {
+  --bg: #0b0e12;
+  --panel: rgba(15, 18, 25, 0.85);
+  --text: #e6eef8;
+
+  --primary: #00f0ff;   /* azul neon */
+  --accent: #7e3ff2;    /* roxo neon */
+
+  --radius: 14px;
+  --border: 2px;
+  --font-ui: "Orbitron", Arial, sans-serif;
+}
+
+/* Fundo */
+body {
+  font-family: "Orbitron", monospace;;
+  background: var(--bg);
+  color: var(--text);
+  padding: 24px;
+  min-height: 100vh;
+}
+
+/* Container principal */
+.window {
+  background: var(--panel);
+  border: var(--border) solid var(--primary);
+  border-radius: var(--radius);
+  padding: 20px;
+  max-width: 940px;
+  margin: auto;
+  box-shadow: 0 0 12px rgba(0,240,255,0.4), 0 0 24px rgba(126,63,242,0.3);
+}
+
+/* Títulos */
+h2, h3 {
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--text);
+  margin-bottom: 12px;
+  text-shadow: 0 0 8px rgba(0,240,255,0.6);
+  font-family: "Orbitron", monospace;
+}
+
+/* Labels */
+label {
+  display: block;
+  margin: 12px 0;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  color: var(--accent);
+  text-shadow: 0 0 6px rgba(126,63,242,0.6);
+}
+
+/* Inputs */
+input[type="text"], input[type="file"] {
+  background: #0e1218;
+  color: var(--text);
+  border: 2px solid var(--primary);
+  border-radius: 10px;
+  padding: 10px;
+  width: 100%;
+  transition: 0.25s;
+}
+input:focus {
+  border-color: var(--accent);
+  box-shadow: 0 0 12px rgba(126,63,242,0.6), 0 0 20px rgba(0,240,255,0.5);
+  transform: translateY(-2px);
+}
+
+/* Botões */
+button {
+  background: linear-gradient(90deg, var(--accent), var(--primary));
+  color: #0b0e12;
+  border: none;
+  border-radius: 10px;
+  padding: 12px 20px;
+  font-weight: bold;
+  cursor: pointer;
+  box-shadow: 0 0 12px rgba(0,240,255,0.6);
+  transition: 0.2s;
+  font-family: "Orbitron", monospace;
+}
+button:hover {
+  transform: translateY(-2px);
+  filter: brightness(1.1);
+}
+button:active {
+  transform: translateY(0);
+  filter: brightness(0.95);
+}
+
+/* Mapa */
+.mapa img {
+  max-width: 100%;
+  border: 3px solid var(--accent);
+  border-radius: var(--radius);
+  margin: 20px 0;
+  box-shadow: 0 0 12px rgba(126,63,242,0.6);
+  animation: pulseGlow 3s infinite;
+}
+@keyframes pulseGlow {
+  0%, 100% { box-shadow: 0 0 10px var(--accent); }
+  50% { box-shadow: 0 0 20px var(--primary); }
+}
+
+/* Perguntas */
+#listaPerguntas {
+  margin-top: 20px;
+  display: grid;
+  gap: 18px;
+}
+.pergunta {
+  background: rgba(14, 18, 24, 0.7);
+  border: 2px solid var(--accent);
+  border-radius: var(--radius);
+  padding: 14px;
+  box-shadow: 0 0 10px rgba(126,63,242,0.4);
+  transition: 0.25s;
+  font-family: "Orbitron", monospace;
+}
+.pergunta:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 0 16px rgba(0,240,255,0.5);
+}
+.pergunta strong {
+  color: var(--primary);
+  font-family: var(--font-ui);
+  letter-spacing: 0.06em;
+  text-shadow: 0 0 6px rgba(0,240,255,0.6);
+}
+
+  </style>
+</head>
+<body>
+
+  <div class="window">
+    <h2>Editar Prova</h2>
+    <label>Título: <input id="titulo" type="text"></label><br>
+    <label>Professor: <input id="professor" type="text"></label><br>
+    <p><strong>Código da Prova:</strong> <span id="codigo"></span></p>
+
+    <div class="mapa">
+      <img id="mapa" alt="Mapa da prova">
+      <br>
+      <input type="file" id="novoMapa" accept="image/*">
+      <button id="uploadMapaBtn">Trocar Mapa</button>
+    </div>
+
+    <h3>Perguntas</h3>
+    <div id="listaPerguntas"></div>
+
+    <button id="salvarBtn">Salvar Alterações</button>
+  </div>
+
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/11.9.1/firebase-app.js";
+    import { getDatabase, ref, get, child, set } from "https://www.gstatic.com/firebasejs/11.9.1/firebase-database.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyC3P2fwNlkUPkpoCnaxWtp9-61163huINE",
+      authDomain: "game-geolocation.firebaseapp.com",
+      databaseURL: "https://game-geolocation-default-rtdb.firebaseio.com",
+      projectId: "game-geolocation",
+      storageBucket: "game-geolocation.firebasestorage.app",
+      messagingSenderId: "488902360575",
+      appId: "1:488902360575:web:3419d3432b453d76767bca"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db = getDatabase(app);
+
+    const provaId = localStorage.getItem("provaSelecionadaId");
+    let imagemProvaURL = "";
+
+    async function carregarProva() {
+      const snapshot = await get(child(ref(db), "provas/" + provaId));
+      if (snapshot.exists()) {
+        const prova = snapshot.val();
+
+        document.getElementById("titulo").value = prova.titulo;
+        document.getElementById("professor").value = prova.professor;
+        document.getElementById("codigo").textContent = prova.codigoProva;
+        document.getElementById("mapa").src = prova.imagemProvaURL;
+        imagemProvaURL = prova.imagemProvaURL;
+
+        const lista = document.getElementById("listaPerguntas");
+        lista.innerHTML = "";
+        prova.perguntas.forEach((p, idx) => {
+          const div = document.createElement("div");
+          div.className = "pergunta";
+         div.innerHTML = `
+  <strong>Pergunta ${idx+1}</strong><br>
+  <textarea rows="3" class="enunciado">${p.enunciado}</textarea><br>
+  <div class="opcao">A) <input type="text" value="${p.opcoes[0]}"></div>
+  <div class="opcao">B) <input type="text" value="${p.opcoes[1]}"></div>
+  <div class="opcao">C) <input type="text" value="${p.opcoes[2]}"></div>
+  <div class="opcao">D) <input type="text" value="${p.opcoes[3]}"></div>
+  <label>Resposta correta:
+    <select class="resposta">
+      <option value="0" ${p.respostaCorreta===0?"selected":""}>A</option>
+      <option value="1" ${p.respostaCorreta===1?"selected":""}>B</option>
+      <option value="2" ${p.respostaCorreta===2?"selected":""}>C</option>
+      <option value="3" ${p.respostaCorreta===3?"selected":""}>D</option>
+    </select>
+  </label><br>
+  <label>Latitude: <input type="text" class="lat" value="${p.lat || ""}"></label><br>
+  <label>Longitude: <input type="text" class="lng" value="${p.lng || ""}"></label>
+`;
+
+          lista.appendChild(div);
+        });
+      } else {
+        document.querySelector(".window").innerHTML = "<p>Prova não encontrada.</p>";
+      }
+    }
+
+    // Upload de novo mapa para Cloudinary
+    document.getElementById("uploadMapaBtn").addEventListener("click", async () => {
+      const file = document.getElementById("novoMapa").files[0];
+      if (!file) return alert("Selecione uma imagem!");
+
+      const fd = new FormData();
+      fd.append("file", file);
+      fd.append("upload_preset", "geomapas"); // seu preset no Cloudinary
+
+      try {
+        const r = await fetch("https://api.cloudinary.com/v1_1/dqikxjhp3/image/upload", {
+          method: "POST",
+          body: fd
+        });
+        const j = await r.json();
+        if (!j.secure_url) {
+          alert("Erro ao enviar imagem. Verifique o preset no Cloudinary.");
+          return;
+        }
+        imagemProvaURL = j.secure_url;
+        document.getElementById("mapa").src = imagemProvaURL;
+        alert("Mapa atualizado com sucesso!");
+      } catch (err) {
+        console.error("Erro de rede:", err);
+        alert("Erro ao enviar imagem. Veja o console para detalhes.");
+      }
+    });
+
+    document.getElementById("salvarBtn").addEventListener("click", async () => {
+      const titulo = document.getElementById("titulo").value;
+      const professor = document.getElementById("professor").value;
+      const codigoProva = document.getElementById("codigo").textContent;
+
+      const perguntas = Array.from(document.querySelectorAll(".pergunta")).map(div => {
+  return {
+    enunciado: div.querySelector(".enunciado").value,
+    opcoes: Array.from(div.querySelectorAll(".opcao input")).map(i => i.value),
+    respostaCorreta: parseInt(div.querySelector(".resposta").value),
+    lat: div.querySelector(".lat").value,
+    lng: div.querySelector(".lng").value
+  };
+});
+
+
+      await set(ref(db, "provas/" + provaId), {
+        titulo,
+        professor,
+        codigoProva,
+        imagemProvaURL,
+        perguntas,
+        dataCriacao: new Date().toISOString()
+      });
+
+      alert("Prova atualizada com sucesso!");
+      window.location.href = "index.html"; // volta para lista
+    });
+
+    carregarProva();
+  </script>
+
+</body>
+</html>

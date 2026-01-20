@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <!--inserir ícones-->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+
+  <!-- Fonte Inter para o layout -->
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400&display=swap" rel="stylesheet">
+  <title>Área do Aluno - Entrar na Sala</title>
+  <style>
+    /* Estilo principal da página: centraliza verticalmente e horizontalmente */
+    body {
+      margin: 0;
+      padding: 0;
+      font-family: 'Inter', sans-serif;
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+      background-color: #f4f4f4;
+      background-image: url('assets/img/index.jpg');
+      background-size: cover;       
+      background-position: center;        
+      background-repeat: no-repeat;
+    }
+
+    /* Botão flutuante para ir para a área do professor */
+    .area_do_professor {
+      position: absolute;
+      top: 20px;
+      right: 20px;
+      height: 30px;
+      padding: 5px 15px;
+      display: flex;
+      align-items: center;
+      padding: 6px 18px;        /* mais fino */
+  background: rgba(0, 0, 30, 0.95);
+  color: #00f0ff;
+  text-decoration: none;
+  border-radius: 6px;
+  font-family: "Share Tech Mono", monospace;
+  font-size: 16px;
+  text-transform: uppercase;
+  border: 1px solid #00f0ff;
+  box-shadow: 0 0 8px #00f0ff, inset 0 0 4px #003344;
+  transition: all 0.3s ease;
+    }
+
+     /* Título estilizado com caixa */
+    .titulo {
+  font-size: 36px;
+  font-weight: bold;
+  color: white; /* ou qualquer cor que contraste com o fundo */
+  background-color: rgba(0, 0, 0, 0.6); /* fundo escuro semi-transparente */
+  padding: 20px 40px;
+  border-radius: 12px;
+  text-align: center;
+  box-shadow: 0 4px 8px rgba(0,0,0,0.3);
+    }
+
+    
+    /* Área para digitar o código */
+.codigo {
+  margin-top: 50px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  font-family: "Orbitron", monospace; /* fonte futurista */
+}
+
+/* Campo de entrada do código */
+.codigo input {
+  padding: 12px;
+  font-size: 22px;
+  border: 2px solid #00f0ff; /* azul neon */
+  border-radius: 8px;
+  width: 280px;
+  text-align: center;
+  background-color: #0a0a0a; /* fundo escuro */
+  color: #00f0ff; /* texto neon */
+  box-shadow: 0 0 10px #00f0ff, 0 0 20px #560084; /* efeito glow */
+  transition: all 0.3s ease-in-out;
+  font-family: "Orbitron", monospace;
+}
+
+/* Efeito ao focar */
+.codigo input:focus {
+  outline: none;
+  border-color: #ff00ff;
+  box-shadow: 0 0 15px #ff00ff, 0 0 30px #00f0ff;
+}
+
+/* Estilo do placeholder */
+.codigo input::placeholder {
+  color: #666;
+  text-shadow: 0 0 5px #560084;
+  font-style: italic;
+}
+
+
+    /* Botão futurista de entrar */
+.codigo button {
+  padding: 12px 24px;
+  background: linear-gradient(135deg, #560084, #00f0ff); /* gradiente neon */
+  color: #fff;
+  border: 2px solid #00f0ff;
+  border-radius: 10px;
+  font-size: 18px;
+  font-family: "Orbitron", monospace; /* fonte futurista */
+  cursor: pointer;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  box-shadow: 0 0 10px #00f0ff, 0 0 20px #560084;
+  transition: all 0.3s ease-in-out;
+}
+
+/* Efeito hover futurista */
+.codigo button:hover {
+  background: linear-gradient(135deg, #00f0ff, #ff00ff);
+  border-color: #ff00ff;
+  box-shadow: 0 0 15px #ff00ff, 0 0 30px #00f0ff;
+  transform: scale(1.05); /* leve aumento */
+}
+
+/* Efeito de clique */
+.codigo button:active {
+  transform: scale(0.95);
+  box-shadow: 0 0 5px #ff00ff, 0 0 15px #00f0ff;
+}
+
+/* Mensagem de erro futurista */
+.error {
+  color: #ff0044;
+  margin-top: 12px;
+  text-align: center;
+  font-family: "Roboto Mono", monospace;
+  text-shadow: 0 0 5px #ff0044;
+}
+
+  </style>
+</head>
+<body>
+  <!-- Botão para voltar para a Área do Professor -->
+  <a class="btn area_do_professor" href="areap.html">
+  <i class="fa-solid fa-robot" style="margin-right:8px;"></i> Área do Professor
+</a>
+
+
+  <!-- Título -->
+  <div class="titulo">JOGO DE GEOLOCALIZAÇÃO</div>
+
+  <!-- Área para digitar o código -->
+  <form id="formCodigo" class="codigo">
+    <input id="codigoSala" type="text" placeholder="Digite o código" autocomplete="off" />
+    <button id="entrarBtn" type="submit">Entrar</button>
+    <div id="erroMsg" class="error"></div>
+  </form>
+
+  <!-- Firebase e lógica JS -->
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/11.9.1/firebase-app.js";
+    import { getDatabase, ref, get, child } from "https://www.gstatic.com/firebasejs/11.9.1/firebase-database.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyC3P2fwNlkUPkpoCnaxWtp9-61163huINE",
+      authDomain: "game-geolocation.firebaseapp.com",
+      databaseURL: "https://game-geolocation-default-rtdb.firebaseio.com",
+      projectId: "game-geolocation",
+      storageBucket: "game-geolocation.firebasestorage.app",
+      messagingSenderId: "488902360575",
+      appId: "1:488902360575:web:3419d3432b453d76767bca"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db = getDatabase(app);
+
+    const formCodigo = document.getElementById("formCodigo");
+    const erroMsg = document.getElementById("erroMsg");
+
+    formCodigo.addEventListener("submit", (event) => {
+      event.preventDefault(); // evita recarregar a página
+      const codigo = document.getElementById("codigoSala").value.trim();
+
+      if (!codigo) {
+        erroMsg.textContent = "Por favor, digite o código da sala.";
+        return;
+      }
+
+      const dbRef = ref(db);
+      get(child(dbRef, "provas/" + codigo)).then(snapshot => {
+        if (snapshot.exists()) {
+          const dadosProva = snapshot.val();
+          localStorage.setItem('provaAtual', JSON.stringify(dadosProva));
+          localStorage.setItem('provaSelecionadaId', codigo);
+          localStorage.setItem('indiceAtual', '0');
+          window.location.href = "perguntas.html";
+        } else {
+          erroMsg.textContent = "Código inválido! Prova não encontrada.";
+        }
+      }).catch(error => {
+        console.error(error);
+        erroMsg.textContent = "Erro ao buscar a prova. Tente novamente.";
+      });
+    });
+  </script>
+</body>
+
+</html>
