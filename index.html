@@ -58,10 +58,22 @@
   background-color: rgba(0, 0, 0, 0.6); /* fundo escuro semi-transparente */
   padding: 20px 40px;
   border-radius: 12px;
-  text-align: center;
+  text-align: left;
   box-shadow: 0 4px 8px rgba(0,0,0,0.3);
     }
-
+.titulo .game { 
+  display: block; /* força a ficar em cima */ 
+  font-size: 24px; /* menor que GEOLOCALIZAÇÃO */
+  font-weight: normal; /* menos destaque */
+ } 
+ .titulo .geo {
+   display: block;
+    font-size: 48px; /* maior para dar impacto */
+    font-weight: bold; }
+ .titulo .localizacao {
+   display: block;
+    font-size: 48px; /* maior para dar impacto */
+    font-weight: bold; }
     
     /* Área para digitar o código */
 .codigo {
@@ -152,7 +164,11 @@
 
 
   <!-- Título -->
-  <div class="titulo">JOGO DE GEOLOCALIZAÇÃO</div>
+  <div class="titulo">
+    <span class="game">Game</span>
+    <span class="geo">GEO</span>
+    <span class="localizacao">LOCALIZAÇÃO</span>
+  </div>
 
   <!-- Área para digitar o código -->
   <form id="formCodigo" class="codigo">
@@ -209,5 +225,6 @@
     });
   </script>
 </body>
+
 
 </html>
